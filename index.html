@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InvenAI — Smart Inventory Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">⬡</div>
+      <span>Inven<strong>AI</strong></span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" data-page="dashboard">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a href="#" class="nav-item" data-page="inventory">
+        <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        Inventori
+      </a>
+      <a href="#" class="nav-item" data-page="transactions">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Transaksi
+      </a>
+      <a href="#" class="nav-item" data-page="reports">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Laporan
+      </a>
+      <a href="#" class="nav-item" data-page="ai-chat">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        AI Asisten
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">A</div>
+        <div>
+          <div class="user-name">Admin</div>
+          <div class="user-role">Super Admin</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+        <h1 class="page-title" id="pageTitle">Dashboard</h1>
+      </div>
+      <div class="top-bar-right">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="globalSearch" placeholder="Cari produk, kategori..." oninput="handleSearch(this.value)">
+        </div>
+        <button class="btn-primary" onclick="openModal('addProduct')">+ Tambah Produk</button>
+      </div>
+    </header>
+
+    <!-- Pages -->
+    <div id="dashboard" class="page active">
+      <div class="stats-grid">
+        <div class="stat-card accent-green">
+          <div class="stat-icon">📦</div>
+          <div class="stat-info">
+            <div class="stat-value" id="totalProducts">0</div>
+            <div class="stat-label">Total Produk</div>
+          </div>
+          <div class="stat-trend up" id="productTrend">+0%</div>
+        </div>
+        <div class="stat-card accent-blue">
+          <div class="stat-icon">💰</div>
+          <div class="stat-info">
+            <div class="stat-value" id="totalValue">Rp 0</div>
+            <div class="stat-label">Total Nilai Stok</div>
+          </div>
+          <div class="stat-trend up" id="valueTrend">+0%</div>
+        </div>
+        <div class="stat-card accent-orange">
+          <div class="stat-icon">⚠️</div>
+          <div class="stat-info">
+            <div class="stat-value" id="lowStockCount">0</div>
+            <div class="stat-label">Stok Menipis</div>
+          </div>
+          <div class="stat-trend down" id="lowStockTrend">!</div>
+        </div>
+        <div class="stat-card accent-purple">
+          <div class="stat-icon">📊</div>
+          <div class="stat-info">
+            <div class="stat-value" id="totalCategories">0</div>
+            <div class="stat-label">Kategori</div>
+          </div>
+          <div class="stat-trend neutral" id="catTrend">—</div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="card chart-card">
+          <div class="card-header">
+            <h2>Tren Stok Bulanan</h2>
+            <select id="chartYear" onchange="renderChart()">
+              <option value="2025">2025</option>
+              <option value="2024">2024</option>
+            </select>
+          </div>
+          <canvas id="stockChart" height="200"></canvas>
+        </div>
+        <div class="card">
+          <div class="card-header"><h2>Distribusi Kategori</h2></div>
+          <canvas id="categoryChart" height="220"></canvas>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="card">
+          <div class="card-header"><h2>Produk Stok Menipis</h2></div>
+          <div id="lowStockList" class="low-stock-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h2>Aktivitas Terbaru</h2></div>
+          <div id="recentActivity" class="activity-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inventory Page -->
+    <div id="inventory" class="page">
+      <div class="filters-bar">
+        <div class="filter-group">
+          <label>Kategori:</label>
+          <select id="filterCategory" onchange="renderInventoryTable()">
+            <option value="">Semua</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Status:</label>
+          <select id="filterStatus" onchange="renderInventoryTable()">
+            <option value="">Semua</option>
+            <option value="normal">Normal</option>
+            <option value="low">Stok Menipis</option>
+            <option value="out">Habis</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Urutkan:</label>
+          <select id="sortBy" onchange="renderInventoryTable()">
+            <option value="name">Nama</option>
+            <option value="stock">Stok</option>
+            <option value="value">Nilai</option>
+            <option value="date">Tanggal</option>
+          </select>
+        </div>
+        <button class="btn-export" onclick="exportToCSV()">⬇ Export CSV</button>
+      </div>
+
+      <div class="card table-card">
+        <table class="data-table" id="inventoryTable">
+          <thead>
+            <tr>
+              <th>Produk</th>
+              <th>SKU</th>
+              <th>Kategori</th>
+              <th>Stok</th>
+              <th>Min. Stok</th>
+              <th>Harga</th>
+              <th>Nilai</th>
+              <th>Status</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="inventoryTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Transactions Page -->
+    <div id="transactions" class="page">
+      <div class="trans-actions">
+        <button class="btn-primary" onclick="openModal('addTransaction')">+ Tambah Transaksi</button>
+        <div class="trans-filters">
+          <select id="transType" onchange="renderTransactions()">
+            <option value="">Semua Tipe</option>
+            <option value="masuk">Masuk</option>
+            <option value="keluar">Keluar</option>
+            <option value="penyesuaian">Penyesuaian</option>
+          </select>
+          <input type="month" id="transMonth" onchange="renderTransactions()">
+        </div>
+      </div>
+      <div class="card table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Tanggal</th>
+              <th>No. Ref</th>
+              <th>Produk</th>
+              <th>Tipe</th>
+              <th>Qty</th>
+              <th>Harga</th>
+              <th>Total</th>
+              <th>Catatan</th>
+            </tr>
+          </thead>
+          <tbody id="transTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Reports Page -->
+    <div id="reports" class="page">
+      <div class="report-controls">
+        <div class="report-tabs">
+          <button class="tab-btn active" data-period="monthly" onclick="switchReport('monthly')">Bulanan</button>
+          <button class="tab-btn" data-period="quarterly" onclick="switchReport('quarterly')">Triwulan</button>
+          <button class="tab-btn" data-period="yearly" onclick="switchReport('yearly')">Tahunan</button>
+          <button class="tab-btn" data-period="category" onclick="switchReport('category')">Per Kategori</button>
+        </div>
+        <div class="report-filters">
+          <select id="reportYear" onchange="generateReport()">
+            <option value="2025">2025</option>
+            <option value="2024">2024</option>
+          </select>
+          <select id="reportMonth" onchange="generateReport()">
+            <option value="0">Semua Bulan</option>
+            <option value="1">Januari</option><option value="2">Februari</option>
+            <option value="3">Maret</option><option value="4">April</option>
+            <option value="5">Mei</option><option value="6">Juni</option>
+            <option value="7">Juli</option><option value="8">Agustus</option>
+            <option value="9">September</option><option value="10">Oktober</option>
+            <option value="11">November</option><option value="12">Desember</option>
+          </select>
+          <button class="btn-export" onclick="exportReport()">⬇ Export</button>
+        </div>
+      </div>
+
+      <div id="reportContent">
+        <div class="report-summary" id="reportSummary"></div>
+        <div class="card">
+          <canvas id="reportChart" height="180"></canvas>
+        </div>
+        <div class="card table-card">
+          <table class="data-table">
+            <thead id="reportTableHead"></thead>
+            <tbody id="reportTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Chat Page -->
+    <div id="ai-chat" class="page">
+      <div class="ai-header">
+        <div class="ai-avatar">🤖</div>
+        <div>
+          <h2>AI Inventory Asisten</h2>
+          <p>Tanya apa saja tentang inventori Anda — analisis, prediksi, rekomendasi</p>
+        </div>
+        <div class="api-key-section">
+          <input type="password" id="apiKeyInput" placeholder="Masukkan API Key Anthropic..." class="api-input">
+          <button onclick="saveApiKey()" class="btn-save-key">Simpan</button>
+        </div>
+      </div>
+
+      <div class="quick-prompts">
+        <button onclick="sendQuickPrompt('Berikan analisis stok saat ini dan produk yang perlu direstok')">📊 Analisis Stok</button>
+        <button onclick="sendQuickPrompt('Prediksi kebutuhan inventori bulan depan berdasarkan tren')">🔮 Prediksi Kebutuhan</button>
+        <button onclick="sendQuickPrompt('Produk mana yang paling banyak keluar bulan ini?')">📈 Produk Terlaris</button>
+        <button onclick="sendQuickPrompt('Rekomendasikan strategi pengadaan yang optimal')">💡 Strategi Pengadaan</button>
+        <button onclick="sendQuickPrompt('Buat rekapitulasi laporan inventori lengkap')">📋 Rekapitulasi Lengkap</button>
+      </div>
+
+      <div class="chat-container" id="chatContainer">
+        <div class="chat-message ai">
+          <div class="chat-bubble">
+            Halo! Saya AI Asisten InvenAI. Saya dapat membantu menganalisis inventori Anda, memberikan prediksi kebutuhan stok, rekomendasi pengadaan, dan rekapitulasi laporan. Apa yang ingin Anda ketahui?
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-input-area">
+        <textarea id="chatInput" placeholder="Tanya AI tentang inventori Anda..." rows="2" onkeydown="handleChatKey(event)"></textarea>
+        <button onclick="sendChatMessage()" class="btn-send" id="sendBtn">
+          <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Modals -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
